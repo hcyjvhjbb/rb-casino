@@ -6,26 +6,6 @@
     <title>RB eSports Casino</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="style.css">
-    <style>
-        /* Принудительные стили для кнопки AP, чтобы она была кликабельной */
-        .admin-trigger-btn {
-            display: block;
-            margin: 30px auto;
-            padding: 10px 20px;
-            background: rgba(0,0,0,0.5);
-            color: #444;
-            border: 1px solid #333;
-            border-radius: 5px;
-            font-size: 14px;
-            cursor: pointer;
-            z-index: 1000;
-            position: relative;
-        }
-        .admin-trigger-btn:active {
-            background: #ff0000;
-            color: white;
-        }
-    </style>
 </head>
 <body>
     <div class="app-container">
@@ -39,9 +19,9 @@
         </div>
 
         <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab('roulette')">🎡 Рулетка</button>
-            <button class="tab-btn" onclick="switchTab('shop')">🛒 Магазин</button>
-            <button class="tab-btn" id="tab-btn-code" onclick="switchTab('code')" style="display:none;">💻 Взлом</button>
+            <button class="tab-btn active" onclick="switchTab('roulette', this)">🎡 Рулетка</button>
+            <button class="tab-btn" onclick="switchTab('shop', this)">🛒 Магазин</button>
+            <button class="tab-btn" id="tab-btn-code" onclick="switchTab('code', this)" style="display:none;">💻 Взлом</button>
         </div>
 
         <!-- РУЛЕТКА -->
@@ -66,7 +46,6 @@
                     <button class="bet-btn" onclick="spin(100)">100 🪙</button>
                     <button class="bet-btn" onclick="spin(500)">500 🪙</button>
                 </div>
-                <!-- Кнопка своей суммы -->
                 <button class="bet-btn" style="width: 100%; margin-top: 5px; background: #ffcc00; color: #000;" onclick="customSpin()">✏️ Своя сумма</button>
                 <button class="cancel-btn" onclick="cancelBet()">Отмена</button>
             </div>
@@ -83,37 +62,17 @@
         <!-- ВЗЛОМ -->
         <div id="tab-code" class="tab-content">
             <div class="code-container">
-                <h3>Взлом кода</h3>
-                <p>Введи число от 1 до 100</p>
-                <input type="number" id="code-input" placeholder="Твое число..." min="1" max="100">
+                <h3>Взлом кода (1-10)</h3>
+                <p>Введи число от 1 до 10</p>
+                <input type="number" id="code-input" placeholder="Число..." min="1" max="10">
                 <button class="action-btn" onclick="tryCode()">Взломать</button>
                 <div class="result-text" id="code-result-text"></div>
             </div>
         </div>
 
-        <!-- Кнопка AP внизу -->
-        <button class="admin-trigger-btn" onclick="openAdminPanel()">AP</button>
-    </div>
-
-    <!-- Модальное окно админки -->
-    <div id="admin-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9999; padding: 20px; overflow-y: auto;">
-        <div style="background: #1a1a1a; padding: 20px; border-radius: 12px; max-width: 400px; margin: 20px auto; border: 1px solid #ff0000;">
-            <h3 style="color: #ff3333; margin-bottom: 15px; text-align: center;">Admin Panel</h3>
-            <input type="password" id="admin-pass" placeholder="Password" style="width: 100%; padding: 10px; margin-bottom: 15px; background: #222; border: 1px solid #555; color: white; border-radius: 8px;">
-            <button onclick="checkAdminPass()" style="width: 100%; padding: 10px; background: #ff0000; color: white; border: none; border-radius: 8px; font-weight: bold; margin-bottom: 15px;">Войти</button>
-            
-            <div id="admin-content" style="display: none;">
-                <h4 style="color: #aaa; margin-bottom: 10px;">Режим рулетки:</h4>
-                <button onclick="setAdminMode('fair')" style="width: 100%; padding: 10px; margin-bottom: 5px; background: #333; color: white; border: 1px solid #555; border-radius: 8px; text-align: left;">⚖️ Честный</button>
-                <button onclick="setAdminMode('negative')" style="width: 100%; padding: 10px; margin-bottom: 5px; background: #333; color: white; border: 1px solid #555; border-radius: 8px; text-align: left;">🔴 Казино в плюсе</button>
-                <button onclick="setAdminMode('positive')" style="width: 100%; padding: 10px; margin-bottom: 15px; background: #333; color: white; border: 1px solid #555; border-radius: 8px; text-align: left;">🟢 Казино в минусе</button>
-
-                <h4 style="color: #aaa; margin-bottom: 10px;">Изменить цену (UC:Цена):</h4>
-                <input type="text" id="price-input" placeholder="Пример: 60:100" style="width: 100%; padding: 10px; margin-bottom: 10px; background: #222; border: 1px solid #555; color: white; border-radius: 8px;">
-                <button onclick="updatePrice()" style="width: 100%; padding: 10px; background: #32cd32; color: white; border: none; border-radius: 8px; font-weight: bold; margin-bottom: 15px;">Обновить цену</button>
-                
-                <button onclick="closeAdminPanel()" style="width: 100%; padding: 10px; background: transparent; color: #ff3333; border: 1px solid #ff3333; border-radius: 8px; font-weight: bold;">Закрыть</button>
-            </div>
+        <!-- Кнопка AP -->
+        <div style="text-align: center; margin-top: 30px;">
+            <button onclick="openAdmin()" style="background: transparent; border: 1px solid #333; color: #555; padding: 10px 20px; cursor: pointer; border-radius: 5px;">AP</button>
         </div>
     </div>
 
