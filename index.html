@@ -144,6 +144,7 @@
 
     <script>
         const tg = window.Telegram.WebApp;
+        tg.onEvent('themeChanged', function() {});
         tg.expand();
 
         const urlParams = new URLSearchParams(window.location.search);
