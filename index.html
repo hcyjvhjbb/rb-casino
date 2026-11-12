@@ -6,10 +6,8 @@
     <title>RB eSports Casino</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        /* СБРОС СТИЛЕЙ */
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background-color: #0a0a0a; color: #fff; display: flex; justify-content: center; min-height: 100vh; overflow-x: hidden; }
-        
         .app-container { width: 100%; max-width: 450px; background: linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 100%); min-height: 100vh; display: flex; flex-direction: column; padding-bottom: 20px; }
         
         .banner-container { width: 100%; height: 160px; overflow: hidden; border-bottom: 2px solid #ff0000; }
@@ -18,14 +16,12 @@
         .balance-card { margin: 15px 15px 0 15px; padding: 12px; background: rgba(30, 30, 30, 0.8); border: 1px solid #333; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; font-size: 16px; }
         .balance-value { font-weight: bold; color: #ffcc00; font-size: 20px; }
 
-        /* ТАБЫ */
         .tabs { display: flex; margin: 15px; background: #222; border-radius: 10px; padding: 5px; gap: 5px; }
         .tab-btn { flex: 1; padding: 10px; border: none; border-radius: 8px; background: transparent; color: #888; font-weight: bold; cursor: pointer; transition: all 0.2s; font-size: 14px; outline: none; }
         .tab-btn.active { background: #ff0000; color: #fff; }
         .tab-content { display: none; padding: 0 15px; flex-direction: column; align-items: center; }
         .tab-content.active { display: flex; }
 
-        /* РУЛЕТКА */
         .roulette-window { width: 140px; height: 140px; background: #000; border: 3px solid #ff0000; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: 10px 0 20px 0; }
         .roulette-result { font-size: 60px; }
         
@@ -37,16 +33,13 @@
         .purple { background: linear-gradient(135deg, #9370db, #4b0082); }
         .orange { background: linear-gradient(135deg, #ff8c00, #8b4500); }
 
-        /* ЗОНА СТАВОК */
         .bet-area { width: 100%; background: #111; padding: 15px; border-radius: 12px; border: 1px solid #ff3333; display: none; flex-direction: column; align-items: center; }
         .bet-area.active { display: flex; }
-        
         .bet-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; margin-bottom: 10px; }
         .bet-btn { padding: 12px; background: #333; color: #fff; border: 1px solid #555; border-radius: 8px; font-weight: bold; cursor: pointer; z-index: 10; }
         .bet-btn:active { background: #555; }
         .cancel-btn { background: transparent; color: #ff3333; border: none; padding: 10px; cursor: pointer; text-decoration: underline; z-index: 10; }
 
-        /* МАГАЗИН */
         .shop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
         .shop-item { background: #1a1a1a; border: 1px solid #333; border-radius: 10px; padding: 10px; display: flex; flex-direction: column; align-items: center; text-align: center; }
         .shop-item-img { width: 60px; height: 60px; object-fit: contain; margin-bottom: 5px; }
@@ -54,12 +47,10 @@
         .shop-item-price { font-size: 12px; color: #aaa; margin-bottom: 8px; }
         .buy-btn { width: 100%; padding: 8px; background: #ff0000; color: #fff; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; z-index: 10; }
 
-        /* ВЗЛОМ */
         .code-container { width: 100%; background: rgba(0, 0, 0, 0.6); padding: 20px; border-radius: 12px; border: 1px solid #ff3333; display: flex; flex-direction: column; align-items: center; text-align: center; }
         input[type="number"] { width: 100%; padding: 12px; background: #222; border: 1px solid #555; color: #fff; border-radius: 8px; font-size: 16px; text-align: center; margin-bottom: 15px; }
         .action-btn { width: 100%; padding: 12px; background: #32cd32; color: #fff; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; z-index: 10; }
         
-        /* СКРЫТАЯ АДМИНКА */
         .admin-trigger { position: fixed; bottom: 5px; left: 5px; font-size: 10px; color: #333; cursor: pointer; opacity: 0.3; z-index: 100;}
         .admin-panel { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 999; flex-direction: column; padding: 20px; overflow-y: auto;}
         .admin-panel.active { display: flex; }
@@ -86,7 +77,6 @@
             <button class="tab-btn" id="btn-tab-code" onclick="switchTab('code')" style="display:none;">💻 Взлом</button>
         </div>
 
-        <!-- РУЛЕТКА -->
         <div id="tab-roulette" class="tab-content active">
             <div class="roulette-window"><div class="roulette-result" id="roulette-display">🎲</div></div>
             <div class="colors-grid" id="colors-grid">
@@ -108,12 +98,10 @@
             </div>
         </div>
 
-        <!-- МАГАЗИН -->
         <div id="tab-shop" class="tab-content">
             <div class="shop-grid" id="shop-grid"></div>
         </div>
 
-        <!-- ВЗЛОМ -->
         <div id="tab-code" class="tab-content">
             <div class="code-container">
                 <h3>Взлом кода</h3>
@@ -135,7 +123,7 @@
 
     <div class="admin-panel" id="admin-settings-panel">
         <span class="admin-close" onclick="closeAdminPanels()">&times;</span>
-        <h2 style="text-align:center;">Настройки Казино</h2>
+        <h2 style="text-align:center;">Настройки</h2>
         <button class="mode-btn" id="mode-fair" onclick="setAdminMode('fair')">⚖️ Честный</button>
         <button class="mode-btn" id="mode-negative" onclick="setAdminMode('negative')">🔴 Казино в плюсе</button>
         <button class="mode-btn" id="mode-positive" onclick="setAdminMode('positive')">🟢 Казино в минусе</button>
@@ -143,8 +131,8 @@
     </div>
 
     <script>
+        // Инициализация
         const tg = window.Telegram.WebApp;
-        tg.onEvent('themeChanged', function() {});
         tg.expand();
 
         const urlParams = new URLSearchParams(window.location.search);
@@ -201,35 +189,26 @@
             document.getElementById('bet-area').classList.remove('active');
         }
 
+        // ОТПРАВКА ДАННЫХ
         function spin(betAmount) {
-            if (betAmount > currentBalance) { 
-                alert("❌ Недостаточно фишек!"); 
-                return; 
-            }
+            if (betAmount > currentBalance) { alert("❌ Недостаточно фишек!"); return; }
             tg.sendData(JSON.stringify({ action: "spin", bet: betAmount, color: selectedColor }));
         }
 
         function buyItem(uc, price) {
-            if (currentBalance < price) { 
-                alert("❌ Недостаточно фишек!"); 
-                return; 
-            }
+            if (currentBalance < price) { alert("❌ Недостаточно фишек!"); return; }
             tg.sendData(JSON.stringify({ action: "buy", uc: uc, price: price }));
         }
 
         function tryCode() {
             const guess = parseInt(document.getElementById('code-input').value);
-            if (isNaN(guess) || guess < 1 || guess > 100) { 
-                alert("❌ Введи число от 1 до 100"); 
-                return; 
-            }
+            if (isNaN(guess) || guess < 1 || guess > 100) { alert("❌ Введи число от 1 до 100"); return; }
             tg.sendData(JSON.stringify({ action: "hack", guess: guess }));
         }
 
         // АДМИНКА
         const ADMIN_PASSWORD = "iD3NIbP!+^*4s)?4]0k4Z~x~~3.n9%[<OublN;NkGqo&$.TbcI";
         let currentAdminMode = "fair";
-
         function openAdminAuth() { document.getElementById('admin-auth-panel').classList.add('active'); }
         function checkPassword() {
             if (document.getElementById('admin-pass-input').value === ADMIN_PASSWORD) {
@@ -241,7 +220,6 @@
         function closeAdminPanels() {
             document.getElementById('admin-auth-panel').classList.remove('active');
             document.getElementById('admin-settings-panel').classList.remove('active');
-            document.getElementById('admin-pass-input').value = '';
         }
         function setAdminMode(mode) { currentAdminMode = mode; updateAdminUI(); }
         function updateAdminUI() {
