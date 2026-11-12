@@ -1,0 +1,188 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: #0a0a0a;
+    color: #ffffff;
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+.app-container {
+    width: 100%;
+    max-width: 450px;
+    background: linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 100%);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Баннер */
+.banner-container {
+    width: 100%;
+    height: 200px;
+    overflow: hidden;
+    border-bottom: 2px solid #ff0000;
+    box-shadow: 0 4px 15px rgba(255, 0, 0, 0.2);
+}
+
+.banner {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+
+/* Баланс */
+.balance-card {
+    margin: 15px;
+    padding: 15px;
+    background: rgba(30, 30, 30, 0.8);
+    border: 1px solid #333;
+    border-radius: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 18px;
+}
+
+.balance-value {
+    font-weight: bold;
+    color: #ffcc00;
+    font-size: 22px;
+}
+
+/* Игровая зона */
+.game-area {
+    padding: 0 15px 20px 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.game-title {
+    margin-bottom: 15px;
+    text-transform: uppercase;
+    color: #ff3333;
+    letter-spacing: 2px;
+    text-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+}
+
+/* Окно рулетки */
+.roulette-window {
+    width: 150px;
+    height: 150px;
+    background: #000;
+    border: 3px solid #ff0000;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+    box-shadow: 0 0 30px rgba(255, 0, 0, 0.3), inset 0 0 20px rgba(0,0,0,1);
+    transition: transform 0.1s;
+}
+
+.roulette-result {
+    font-size: 60px;
+    transition: all 0.1s;
+}
+
+/* Кнопки цветов */
+.colors-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.color-btn {
+    padding: 15px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    color: #fff;
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.1s;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+}
+
+.color-btn:active {
+    transform: scale(0.95);
+}
+
+.yellow { background: linear-gradient(135deg, #ffd700, #b8860b); color: #000; }
+.green { background: linear-gradient(135deg, #32cd32, #006400); }
+.blue { background: linear-gradient(135deg, #1e90ff, #00008b); }
+.purple { background: linear-gradient(135deg, #9370db, #4b0082); }
+.orange { background: linear-gradient(135deg, #ff8c00, #8b4500); }
+
+/* Зона ставок */
+.bet-area {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    padding: 15px;
+    border-radius: 12px;
+    border: 1px solid #ff3333;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.bet-label {
+    margin-bottom: 10px;
+    font-size: 14px;
+    color: #ccc;
+}
+
+.bet-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.bet-btn {
+    padding: 12px;
+    background: #333;
+    color: #fff;
+    border: 1px solid #555;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.bet-btn:active {
+    background: #555;
+}
+
+.cancel-btn {
+    background: transparent;
+    color: #ff3333;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.result-text {
+    margin-top: 20px;
+    font-size: 16px;
+    text-align: center;
+    font-weight: bold;
+    min-height: 24px;
+}

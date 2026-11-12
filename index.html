@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>RB eSports Casino</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Баннер (ваша картинка) -->
+        <div class="banner-container">
+            <img src="banner.png" alt="RB eSports Gambling Only" class="banner">
+        </div>
+
+        <!-- Баланс -->
+        <div class="balance-card">
+            <span class="balance-label">Ваш баланс:</span>
+            <span class="balance-value" id="user-balance">0</span> <span class="coin-icon">🪙</span>
+        </div>
+
+        <!-- Рулетка -->
+        <div class="game-area">
+            <h2 class="game-title">Рулетка Удачи</h2>
+            
+            <!-- Окно выпадения -->
+            <div class="roulette-window">
+                <div class="roulette-result" id="roulette-display">🎲</div>
+            </div>
+
+            <!-- Кнопки выбора цвета -->
+            <div class="colors-grid" id="colors-grid">
+                <button class="color-btn yellow" onclick="selectColor('yellow', 2)">🟨 x2</button>
+                <button class="color-btn green" onclick="selectColor('green', 4)">🟩 x4</button>
+                <button class="color-btn blue" onclick="selectColor('blue', 6)">🟦 x6</button>
+                <button class="color-btn purple" onclick="selectColor('purple', 11)">🟪 x11</button>
+                <button class="color-btn orange" onclick="selectColor('orange', 21)">🟧 x21</button>
+            </div>
+
+            <!-- Выбор ставки -->
+            <div class="bet-area hidden" id="bet-area">
+                <p class="bet-label">Ставка на <span id="selected-color-name"></span> (x<span id="selected-multiplier"></span>)</p>
+                <div class="bet-grid">
+                    <button class="bet-btn" onclick="spin(10)">10 🪙</button>
+                    <button class="bet-btn" onclick="spin(50)">50 🪙</button>
+                    <button class="bet-btn" onclick="spin(100)">100 🪙</button>
+                    <button class="bet-btn" onclick="spin(500)">500 🪙</button>
+                </div>
+                <button class="cancel-btn" onclick="cancelBet()">Отмена</button>
+            </div>
+
+            <div class="result-text" id="result-text"></div>
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
