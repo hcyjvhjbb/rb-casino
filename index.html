@@ -6,203 +6,84 @@
     <title>RB Casino</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background: #0a0a0a; color: #fff; display: flex; justify-content: center; min-height: 100vh; overflow-x: hidden; }
-        .app-container { width: 100%; max-width: 450px; background: linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 100%); min-height: 100vh; display: flex; flex-direction: column; padding-bottom: 20px; }
-        
-        .banner-container { width: 100%; height: 160px; overflow: hidden; border-bottom: 2px solid #ff0000; }
-        .banner { width: 100%; height: 100%; object-fit: cover; }
-        
-        .balance-card { margin: 15px; padding: 12px; background: #1a1a1a; border: 1px solid #333; border-radius: 12px; display: flex; justify-content: space-between; font-size: 16px; }
-        .balance-value { font-weight: bold; color: #ffcc00; font-size: 20px; }
-
-        .tabs { display: flex; margin: 0 15px 15px; background: #222; border-radius: 10px; padding: 5px; gap: 5px; }
-        .tab-btn { flex: 1; padding: 10px; border: none; border-radius: 8px; background: transparent; color: #888; font-weight: bold; font-size: 14px; cursor: pointer; }
-        .tab-btn.active { background: #ff0000; color: #fff; }
-        .tab-content { display: none; padding: 0 15px; flex-direction: column; align-items: center; }
-        .tab-content.active { display: flex; }
-
-        /* РУЛЕТКА */
-        .roulette-window { width: 140px; height: 140px; background: #000; border: 3px solid #ff0000; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 60px; margin: 10px 0 20px 0; }
-        .colors-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; margin-bottom: 20px; }
-        .color-btn { padding: 15px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
-        .yellow { background: linear-gradient(135deg, #ffd700, #b8860b); color: #000; }
-        .green { background: linear-gradient(135deg, #32cd32, #006400); color: #fff; }
-        .blue { background: linear-gradient(135deg, #1e90ff, #00008b); color: #fff; }
-        .purple { background: linear-gradient(135deg, #9370db, #4b0082); color: #fff; }
-        .orange { background: linear-gradient(135deg, #ff8c00, #8b4500); color: #fff; }
-
-        /* СТАВКИ */
-        .bet-area { width: 100%; background: #111; padding: 15px; border-radius: 12px; border: 1px solid #ff3333; display: none; flex-direction: column; align-items: center; }
-        .bet-area.active { display: flex; }
-        .bet-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; margin-bottom: 10px; }
-        .bet-btn { padding: 15px; background: #333; color: #fff; border: 1px solid #555; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; }
-        .bet-btn:active { background: #ff0000; } /* Краснеет при нажатии */
-        .cancel-btn { background: transparent; color: #ff3333; border: none; padding: 10px; cursor: pointer; text-decoration: underline; }
-
-        /* МАГАЗИН */
-        .shop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
-        .shop-item { background: #1a1a1a; border: 1px solid #333; border-radius: 10px; padding: 10px; text-align: center; }
-        .shop-item-img { width: 60px; height: 60px; margin-bottom: 5px; }
-        .buy-btn { width: 100%; padding: 10px; background: #ff0000; color: #fff; border: none; border-radius: 6px; font-weight: bold; font-size: 14px; cursor: pointer; }
-
-        /* ВЗЛОМ */
-        .code-container { width: 100%; background: #111; padding: 20px; border-radius: 12px; border: 1px solid #ff3333; text-align: center; }
-        input[type="number"] { width: 100%; padding: 12px; background: #222; border: 1px solid #555; color: #fff; border-radius: 8px; font-size: 16px; text-align: center; margin-bottom: 15px; }
-        .action-btn { width: 100%; padding: 15px; background: #32cd32; color: #fff; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; }
+        body { background: #0a0a0a; color: #fff; font-family: sans-serif; margin: 0; padding: 15px; text-align: center; }
+        .box { background: #1a1a1a; padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #333; }
+        .btn { padding: 15px; background: #333; color: #fff; border: 1px solid #555; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; margin: 5px; width: 100%; }
+        .btn:active { background: #ff0000; }
+        .btn-yellow { background: #ffd700; color: #000; }
+        .btn-green { background: #32cd32; color: #fff; }
+        .btn-blue { background: #1e90ff; color: #fff; }
+        .btn-purple { background: #9370db; color: #fff; }
+        .btn-orange { background: #ff8c00; color: #fff; }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
-    <div class="app-container">
-        <div class="banner-container">
-            <img src="banner.png" class="banner" onerror="this.style.display='none'">
+    <div class="box">
+        <h2>Ваш баланс</h2>
+        <h1 id="balance" style="color: #ffcc00;">0</h1>
+    </div>
+
+    <div class="box" id="roulette-box">
+        <h3>Рулетка</h3>
+        <div id="colors" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <button class="btn btn-yellow" onclick="selectColor('yellow', 2)">🟨 x2</button>
+            <button class="btn btn-green" onclick="selectColor('green', 4)">🟩 x4</button>
+            <button class="btn btn-blue" onclick="selectColor('blue', 6)">🟦 x6</button>
+            <button class="btn btn-purple" onclick="selectColor('purple', 11)">🟪 x11</button>
+            <button class="btn btn-orange" onclick="selectColor('orange', 21)">🟧 x21</button>
         </div>
 
-        <div class="balance-card">
-            <span>Баланс:</span>
-            <span class="balance-value" id="user-balance">0</span> 🪙
-        </div>
-
-        <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab('roulette')">🎡 Рулетка</button>
-            <button class="tab-btn" onclick="switchTab('shop')">🛒 Магазин</button>
-            <button class="tab-btn" id="btn-hack" onclick="switchTab('code')" style="display:none;">💻 Взлом</button>
-        </div>
-
-        <div id="tab-roulette" class="tab-content active">
-            <div class="roulette-window" id="roulette-display">🎲</div>
-            <div class="colors-grid" id="colors-grid">
-                <button class="color-btn yellow" onclick="selectColor('yellow', 2)">🟨 x2</button>
-                <button class="color-btn green" onclick="selectColor('green', 4)">🟩 x4</button>
-                <button class="color-btn blue" onclick="selectColor('blue', 6)">🟦 x6</button>
-                <button class="color-btn purple" onclick="selectColor('purple', 11)">🟪 x11</button>
-                <button class="color-btn orange" onclick="selectColor('orange', 21)">🟧 x21</button>
-            </div>
-            
-            <div class="bet-area" id="bet-area">
-                <p style="margin-bottom:10px;">Ставка на <span id="selected-color-name" style="color:#ffcc00; font-weight:bold;"></span></p>
-                <div class="bet-grid">
-                    <button class="bet-btn" onclick="spin(10)">10 🪙</button>
-                    <button class="bet-btn" onclick="spin(50)">50 🪙</button>
-                    <button class="bet-btn" onclick="spin(100)">100 🪙</button>
-                    <button class="bet-btn" onclick="spin(500)">500 🪙</button>
-                </div>
-                <button class="cancel-btn" onclick="cancelBet()">Отмена</button>
-            </div>
-        </div>
-
-        <div id="tab-shop" class="tab-content">
-            <div class="shop-grid" id="shop-grid"></div>
-        </div>
-
-        <div id="tab-code" class="tab-content">
-            <div class="code-container">
-                <h3>Взлом кода</h3>
-                <p style="margin:10px 0; color:#aaa;">Введи число от 1 до 100</p>
-                <input type="number" id="code-input" placeholder="Число...">
-                <button class="action-btn" onclick="tryCode()">Взломать</button>
-            </div>
+        <div id="bets" class="hidden" style="margin-top: 15px;">
+            <p>Ставка на <span id="sel-color"></span></p>
+            <button class="btn" onclick="spin(10)">10 🪙</button>
+            <button class="btn" onclick="spin(50)">50 🪙</button>
+            <button class="btn" onclick="spin(100)">100 🪙</button>
+            <button class="btn" onclick="spin(500)">500 🪙</button>
+            <button class="btn" style="background: transparent; color: red; border: none;" onclick="cancel()">Отмена</button>
         </div>
     </div>
 
     <script>
-        // Инициализация Telegram
         const tg = window.Telegram.WebApp;
-        tg.expand();
-
-        // Данные из ссылки
+        
+        // Берем баланс из ссылки
         const urlParams = new URLSearchParams(window.location.search);
-        let currentBalance = parseInt(urlParams.get('balance')) || 0;
-        let isHackActive = urlParams.get('hack') === '1';
-        
-        document.getElementById('user-balance').innerText = currentBalance;
-        if (isHackActive) {
-            document.getElementById('btn-hack').style.display = 'block';
-        }
+        let balance = parseInt(urlParams.get('balance')) || 0;
+        document.getElementById('balance').innerText = balance;
 
-        // МАГАЗИН
-        const shopItems = [
-            { uc: 60, price: 100 }, { uc: 325, price: 500 }, { uc: 660, price: 1000 },
-            { uc: 1800, price: 2500 }, { uc: 3850, price: 5000 }, { uc: 8100, price: 10000 },
-            { uc: 16200, price: 20000 }, { uc: 24300, price: 30000 }, { uc: 32400, price: 40000 }, { uc: 40500, price: 50000 }
-        ];
-        
-        const grid = document.getElementById('shop-grid');
-        shopItems.forEach(item => {
-            grid.innerHTML += `
-                <div class="shop-item">
-                    <img src="uc_icon.png" class="shop-item-img" onerror="this.src='https://via.placeholder.com/60x60/333/fff?text=UC'">
-                    <div style="font-weight:bold; color:#ffcc00;">${item.uc} UC</div>
-                    <div style="font-size:12px; color:#aaa; margin:5px 0;">${item.price} 🪙</div>
-                    <button class="buy-btn" onclick="buyItem(${item.uc}, ${item.price})">Купить</button>
-                </div>
-            `;
-        });
+        let currentColor = "";
 
-        // НАВИГАЦИЯ
-        function switchTab(name) {
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            event.target.classList.add('active');
-            document.getElementById(`tab-${name}`).classList.add('active');
-        }
-
-        // РУЛЕТКА
-        let selectedColor = null;
         function selectColor(color, mult) {
-            selectedColor = color;
-            document.getElementById('colors-grid').style.display = 'none';
-            document.getElementById('bet-area').classList.add('active');
-            
-            const names = { yellow: 'Жёлтый', green: 'Зелёный', blue: 'Синий', purple: 'Фиолетовый', orange: 'Оранжевый' };
-            document.getElementById('selected-color-name').innerText = names[color];
+            currentColor = color;
+            document.getElementById('colors').classList.add('hidden');
+            document.getElementById('bets').classList.remove('hidden');
+            document.getElementById('sel-color').innerText = color.toUpperCase();
         }
 
-        function cancelBet() {
-            document.getElementById('colors-grid').style.display = 'grid';
-            document.getElementById('bet-area').classList.remove('active');
+        function cancel() {
+            document.getElementById('colors').classList.remove('hidden');
+            document.getElementById('bets').classList.add('hidden');
         }
 
-        // ОТПРАВКА В БОТ
-        function spin(bet) {
-            if (bet > currentBalance) {
-                alert("❌ Недостаточно фишек на балансе!");
-                return;
-            }
-            
-            // Если открыто не в Telegram, показываем сообщение
-            if (!tg || !tg.initData) {
-                alert("⚠️ Вы открыли эту страницу в браузере. Откройте её через кнопку в боте!");
-                return;
-            }
-            
-            // Отправляем данные
-            tg.sendData(JSON.stringify({ action: "spin", bet: bet, color: selectedColor }));
-        }
-
-        function buyItem(uc, price) {
-            if (price > currentBalance) {
+        function spin(amount) {
+            if (amount > balance) {
                 alert("❌ Недостаточно фишек!");
                 return;
             }
-            if (!tg || !tg.initData) {
-                alert("⚠️ Откройте игру через бота!");
-                return;
-            }
-            tg.sendData(JSON.stringify({ action: "buy", uc: uc, price: price }));
-        }
 
-        function tryCode() {
-            const guess = parseInt(document.getElementById('code-input').value);
-            if (isNaN(guess) || guess < 1 || guess > 100) {
-                alert("❌ Введи число от 1 до 100!");
+            // ПРОВЕРКА: если вы на ПК, tg.sendData не работает, показываем alert
+            if (tg.platform === "tdesktop" || tg.platform === "web") {
+                alert(`Вы на ПК. Ставка ${amount} на ${currentColor} принята. (На телефоне окно закроется само)`);
                 return;
             }
-            if (!tg || !tg.initData) {
-                alert("⚠️ Откройте игру через бота!");
-                return;
+            
+            // Отправка в бота
+            try {
+                tg.sendData(JSON.stringify({ action: "spin", bet: amount, color: currentColor }));
+            } catch (e) {
+                alert("Ошибка Telegram: " + e.message);
             }
-            tg.sendData(JSON.stringify({ action: "hack", guess: guess }));
         }
     </script>
 </body>
