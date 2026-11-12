@@ -3,80 +3,95 @@ tg.expand();
 
 // Получаем баланс из URL
 const urlParams = new URLSearchParams(window.location.search);
-let currentBalance = parseInt(urlParams.get('balance')) || 1000;
-let hackActive = urlParams.get('hack') === '1';
+let currentBalance = parseInt(urlParams.get('balance')) || 10000;
+let isHackActive = urlParams.get('hack') === '1';
 
 document.getElementById('user-balance').innerText = currentBalance;
-if (hackActive) {
-    document.getElementById('tab-btn-code').style.display = 'block';
-}
 
 // --- НАВИГАЦИЯ ---
-function switchTab(tabName, btn) {
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+function switchTab(tabName) {
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
     
-    btn.classList.add('active');
+    event.target.classList.add('active');
     document.getElementById(`tab-${tabName}`).classList.add('active');
 }
 
 // --- РУЛЕТКА ---
-const colorMap = { 'yellow': 'Жёлтый', 'green': 'Зелёный', 'blue': 'Синий', 'purple': 'Фиолетовый', 'orange': 'Оранжевый' };
-let selectedColor = null;
+const colorMap = {
+    'yellow': { emoji: '🟨', name: 'Жёлтый' },
+    'green':  { emoji: '🟩', name: 'Зелёный' },
+    'blue':   { emoji: '🟦', name: 'Синий' },
+    'purple': { emoji: '🟪', name: 'Фиолетовый' },
+    'orange': { emoji: '🟧', name: 'Оранжевый' }
+};
+const allEmojis = ['🟨', '🟩', '🟦', '🟪', '🟧'];
 
-function selectColor(color, mult) {
+let selectedColor = null;
+let selectedMultiplier = 0;
+let isSpinning = false;
+
+function selectColor(color, multiplier) {
+    if (isSpinning) return;
     selectedColor = color;
-    document.getElementById('colors-grid').style.display = 'none';
+    selectedMultiplier = multiplier;
+    
+    document.getElementById('colors-grid').classList.add('hidden');
     document.getElementById('bet-area').classList.remove('hidden');
-    document.getElementById('selected-color-name').innerText = colorMap[color];
+    document.getElementById('selected-color-name').innerText = colorMap[color].name;
+    document.getElementById('selected-multiplier').innerText = multiplier;
+    document.getElementById('result-text').innerText = "";
 }
 
 function cancelBet() {
     selectedColor = null;
-    document.getElementById('colors-grid').style.display = 'grid';
+    document.getElementById('colors-grid').classList.remove('hidden');
     document.getElementById('bet-area').classList.add('hidden');
 }
 
 function spin(betAmount) {
+    if (isSpinning) return;
     if (betAmount > currentBalance) {
         document.getElementById('result-text').innerText = "❌ Недостаточно фишек!";
         return;
     }
-    sendAction({ action: "spin", bet: betAmount, color: selectedColor });
-}
-
-function customSpin() {
-    let val = prompt("Введите сумму ставки:", "100");
-    if (val === null || val.trim() === "") return;
-    let betAmount = parseInt(val);
     
-    if (isNaN(betAmount) || betAmount <= 0) { alert("❌ Введите корректное число!"); return; }
-    if (betAmount > currentBalance) {
-        document.getElementById('result-text').innerText = "❌ Недостаточно фишек!";
-        return;
+    // Отправляем в бот (на ПК не сработает, но на телефоне закроет окно)
+    if (tg && tg.initData) {
+        tg.sendData(JSON.stringify({ action: "spin", bet: betAmount, color: selectedColor }));
+    } else {
+        alert("Ставка принята! (Откройте через бота на телефоне, чтобы увидеть результат)");
     }
-    sendAction({ action: "spin", bet: betAmount, color: selectedColor });
 }
 
 // --- МАГАЗИН ---
 const shopItems = [
-    { uc: 60, price: 100 }, { uc: 325, price: 500 }, { uc: 660, price: 1000 },
-    { uc: 1800, price: 2500 }, { uc: 3850, price: 5000 }, { uc: 8100, price: 10000 },
-    { uc: 16200, price: 20000 }, { uc: 24300, price: 30000 }, { uc: 32400, price: 40000 }, { uc: 40500, price: 50000 }
+    { uc: 60, price: 100 },
+    { uc: 325, price: 500 },
+    { uc: 660, price: 1000 },
+    { uc: 1800, price: 2500 },
+    { uc: 3850, price: 5000 },
+    { uc: 8100, price: 10000 },
+    { uc: 16200, price: 20000 },
+    { uc: 24300, price: 30000 },
+    { uc: 32400, price: 40000 },
+    { uc: 40500, price: 50000 }
 ];
 
 function renderShop() {
     const grid = document.getElementById('shop-grid');
     grid.innerHTML = '';
+    
     shopItems.forEach(item => {
-        grid.innerHTML += `
-            <div class="shop-item">
-                <img src="uc_icon.png" class="shop-item-img" onerror="this.src='https://via.placeholder.com/60?text=UC'">
-                <div class="shop-item-title">${item.uc} UC</div>
-                <div class="shop-item-price">${item.price} 🪙</div>
-                <button class="buy-btn" onclick="buyItem(${item.uc}, ${item.price})">Купить</button>
-            </div>
+        const div = document.createElement('div');
+        div.className = 'shop-item';
+        div.innerHTML = `
+            <img src="uc_icon.png" alt="${item.uc} UC" class="shop-item-img" onerror="this.src='https://via.placeholder.com/60?text=UC'">
+            <div class="shop-item-title">${item.uc} UC</div>
+            <div class="shop-item-price">${item.price} 🪙</div>
+            <button class="buy-btn" onclick="buyItem(${item.uc}, ${item.price})">Купить</button>
         `;
+        grid.appendChild(div);
     });
 }
 
@@ -85,47 +100,65 @@ function buyItem(uc, price) {
         document.getElementById('shop-result-text').innerHTML = `❌ Недостаточно фишек!`;
         return;
     }
-    sendAction({ action: "buy", uc: uc, price: price });
+    if (tg && tg.initData) {
+        tg.sendData(JSON.stringify({ action: "buy", uc: uc, price: price }));
+    } else {
+        alert(`Покупка ${uc} UC за ${price} фишек принята!`);
+    }
 }
 
-// --- ВЗЛОМ ---
+// --- ВЗЛОМ КОДА ---
 function tryCode() {
     const input = document.getElementById('code-input');
     const guess = parseInt(input.value);
-    if (isNaN(guess) || guess < 1 || guess > 10) {
-        document.getElementById('code-result-text').innerHTML = "❌ Введи число от 1 до 10!";
+    if (isNaN(guess) || guess < 1 || guess > 100) {
+        document.getElementById('code-result-text').innerHTML = "❌ Введи число от 1 до 100!";
         return;
     }
-    sendAction({ action: "hack", guess: guess });
+    if (tg && tg.initData) {
+        tg.sendData(JSON.stringify({ action: "hack", guess: guess }));
+    } else {
+        alert(`Число ${guess} отправлено!`);
+    }
 }
 
-// --- АДМИНКА (Через prompt) ---
+// --- АДМИНКА ---
 const ADMIN_PASS = "iD3NIbP!+^*4s)?4]0k4Z~x~~3.n9%[<OublN;NkGqo&$.TbcI";
+let currentAdminMode = "fair";
 
-function openAdmin() {
-    let pass = prompt("Введите пароль администратора:");
+function openAdminPanel() {
+    document.getElementById('admin-modal').style.display = 'block';
+}
+
+function closeAdminPanel() {
+    document.getElementById('admin-modal').style.display = 'none';
+}
+
+function checkAdminPass() {
+    const pass = document.getElementById('admin-pass').value;
     if (pass === ADMIN_PASS) {
-        let action = prompt("Выберите действие:\n1. Честный режим\n2. Казино в плюсе\n3. Казино в минусе\n4. Изменить цену (Пример: 60:100)");
-        
-        if (action === "1") sendAction({ action: "admin_mode", mode: "fair" });
-        else if (action === "2") sendAction({ action: "admin_mode", mode: "negative" });
-        else if (action === "3") sendAction({ action: "admin_mode", mode: "positive" });
-        else if (action === "4") {
-            let priceVal = prompt("Введите формат UC:Цена (например, 60:100):");
-            if (priceVal && priceVal.includes(':')) sendAction({ action: "admin_price", value: priceVal });
-        }
-    } else if (pass !== null) {
+        document.getElementById('admin-content').style.display = 'block';
+    } else {
         alert("❌ Неверный пароль!");
     }
 }
 
-// --- ОТПРАВКА В БОТ ---
-function sendAction(data) {
+function setAdminMode(mode) {
+    currentAdminMode = mode;
     if (tg && tg.initData) {
-        tg.sendData(JSON.stringify(data));
+        tg.sendData(JSON.stringify({ action: "admin_mode", mode: mode }));
     } else {
-        // Тест на ПК (если не в Telegram)
-        alert("Действие: " + JSON.stringify(data) + "\n(На телефоне в Telegram это закроет окно и выполнит действие)");
+        alert("Режим изменен на " + mode);
+    }
+}
+
+function updatePrice() {
+    const val = document.getElementById('price-input').value;
+    if (!val.includes(':')) { alert("Формат: UC:Цена (например, 60:100)"); return; }
+    if (tg && tg.initData) {
+        tg.sendData(JSON.stringify({ action: "admin_price", value: val }));
+    } else {
+        alert("Цена обновлена: " + val);
     }
 }
 
