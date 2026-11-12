@@ -3,82 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RB eSports Casino</title>
+    <title>RB Casino</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background-color: #0a0a0a; color: #fff; display: flex; justify-content: center; min-height: 100vh; overflow-x: hidden; }
-        .app-container { width: 100%; max-width: 450px; background: linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 100%); min-height: 100vh; display: flex; flex-direction: column; padding-bottom: 20px; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
+        body { background: #0a0a0a; color: #fff; display: flex; justify-content: center; min-height: 100vh; }
+        .app-container { width: 100%; max-width: 450px; padding-bottom: 20px; }
         
-        .banner-container { width: 100%; height: 160px; overflow: hidden; border-bottom: 2px solid #ff0000; }
-        .banner { width: 100%; height: 100%; object-fit: cover; object-position: center; }
+        /* Баннер */
+        .banner-container { width: 100%; height: 160px; overflow: hidden; border-bottom: 2px solid red; }
+        .banner { width: 100%; height: 100%; object-fit: cover; }
         
-        .balance-card { margin: 15px 15px 0 15px; padding: 12px; background: rgba(30, 30, 30, 0.8); border: 1px solid #333; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; font-size: 16px; }
-        .balance-value { font-weight: bold; color: #ffcc00; font-size: 20px; }
+        /* Баланс */
+        .balance-card { margin: 15px; padding: 15px; background: #1a1a1a; border: 1px solid #333; border-radius: 12px; display: flex; justify-content: space-between; font-size: 18px; }
+        .balance-value { color: #ffcc00; font-weight: bold; }
 
-        .tabs { display: flex; margin: 15px; background: #222; border-radius: 10px; padding: 5px; gap: 5px; }
-        .tab-btn { flex: 1; padding: 10px; border: none; border-radius: 8px; background: transparent; color: #888; font-weight: bold; cursor: pointer; transition: all 0.2s; font-size: 14px; outline: none; }
-        .tab-btn.active { background: #ff0000; color: #fff; }
+        /* Табы */
+        .tabs { display: flex; margin: 0 15px 15px; background: #222; border-radius: 10px; padding: 5px; }
+        .tab-btn { flex: 1; padding: 10px; border: none; background: transparent; color: #888; font-weight: bold; border-radius: 8px; cursor: pointer; }
+        .tab-btn.active { background: red; color: white; }
         .tab-content { display: none; padding: 0 15px; flex-direction: column; align-items: center; }
         .tab-content.active { display: flex; }
 
-        .roulette-window { width: 140px; height: 140px; background: #000; border: 3px solid #ff0000; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: 10px 0 20px 0; }
-        .roulette-result { font-size: 60px; }
-        
-        .colors-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; margin-bottom: 20px; }
-        .color-btn { padding: 15px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; color: #fff; cursor: pointer; z-index: 10; }
-        .yellow { background: linear-gradient(135deg, #ffd700, #b8860b); color: #000; }
-        .green { background: linear-gradient(135deg, #32cd32, #006400); }
-        .blue { background: linear-gradient(135deg, #1e90ff, #00008b); }
-        .purple { background: linear-gradient(135deg, #9370db, #4b0082); }
-        .orange { background: linear-gradient(135deg, #ff8c00, #8b4500); }
+        /* Рулетка */
+        .roulette-window { width: 150px; height: 150px; border: 4px solid red; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 60px; margin: 10px 0 20px; background: #000; }
+        .colors-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
+        .color-btn { padding: 15px; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; }
+        .yellow { background: #ffd700; color: #000; }
+        .green { background: #32cd32; }
+        .blue { background: #1e90ff; }
+        .purple { background: #9370db; }
+        .orange { background: #ff8c00; }
 
-        .bet-area { width: 100%; background: #111; padding: 15px; border-radius: 12px; border: 1px solid #ff3333; display: none; flex-direction: column; align-items: center; }
+        /* Ставки */
+        .bet-area { width: 100%; background: #111; padding: 15px; border-radius: 12px; border: 1px solid red; display: none; flex-direction: column; align-items: center; margin-top: 10px; }
         .bet-area.active { display: flex; }
         .bet-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; margin-bottom: 10px; }
-        .bet-btn { padding: 12px; background: #333; color: #fff; border: 1px solid #555; border-radius: 8px; font-weight: bold; cursor: pointer; z-index: 10; }
-        .bet-btn:active { background: #555; }
-        .cancel-btn { background: transparent; color: #ff3333; border: none; padding: 10px; cursor: pointer; text-decoration: underline; z-index: 10; }
+        .bet-btn { padding: 12px; background: #333; color: white; border: 1px solid #555; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .cancel-btn { background: transparent; border: none; color: red; text-decoration: underline; cursor: pointer; }
 
-        .shop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
-        .shop-item { background: #1a1a1a; border: 1px solid #333; border-radius: 10px; padding: 10px; display: flex; flex-direction: column; align-items: center; text-align: center; }
-        .shop-item-img { width: 60px; height: 60px; object-fit: contain; margin-bottom: 5px; }
-        .shop-item-title { font-size: 14px; font-weight: bold; color: #ffcc00; margin-bottom: 2px; }
-        .shop-item-price { font-size: 12px; color: #aaa; margin-bottom: 8px; }
-        .buy-btn { width: 100%; padding: 8px; background: #ff0000; color: #fff; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; z-index: 10; }
+        /* Магазин */
+        .shop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; margin-top: 10px; }
+        .shop-item { background: #1a1a1a; border: 1px solid #333; border-radius: 10px; padding: 10px; text-align: center; }
+        .shop-item img { width: 60px; height: 60px; object-fit: contain; }
+        .buy-btn { width: 100%; padding: 8px; background: red; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
 
-        .code-container { width: 100%; background: rgba(0, 0, 0, 0.6); padding: 20px; border-radius: 12px; border: 1px solid #ff3333; display: flex; flex-direction: column; align-items: center; text-align: center; }
-        input[type="number"] { width: 100%; padding: 12px; background: #222; border: 1px solid #555; color: #fff; border-radius: 8px; font-size: 16px; text-align: center; margin-bottom: 15px; }
-        .action-btn { width: 100%; padding: 12px; background: #32cd32; color: #fff; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; z-index: 10; }
-        
-        .admin-trigger { position: fixed; bottom: 5px; left: 5px; font-size: 10px; color: #333; cursor: pointer; opacity: 0.3; z-index: 100;}
-        .admin-panel { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 999; flex-direction: column; padding: 20px; overflow-y: auto;}
+        /* Взлом */
+        .code-area { width: 100%; background: #111; padding: 20px; border-radius: 12px; border: 1px solid red; display: flex; flex-direction: column; align-items: center; margin-top: 10px; }
+        input[type="number"] { width: 100%; padding: 12px; background: #222; border: 1px solid #555; color: white; border-radius: 8px; font-size: 16px; text-align: center; margin-bottom: 15px; }
+        .action-btn { width: 100%; padding: 12px; background: #32cd32; color: white; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; }
+
+        /* Админка */
+        .admin-trigger { position: fixed; bottom: 5px; left: 5px; font-size: 10px; color: #333; cursor: pointer; opacity: 0.3; z-index: 100; }
+        .admin-panel { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 999; flex-direction: column; padding: 20px; }
         .admin-panel.active { display: flex; }
-        .admin-close { position: absolute; top: 10px; right: 15px; font-size: 24px; color: #fff; cursor: pointer; }
-        .mode-btn { padding: 10px; margin: 5px 0; background: #333; border: 1px solid #555; color: #fff; border-radius: 8px; cursor: pointer; width: 100%; text-align: left;}
-        .mode-btn.active { background: #ff0000; border-color: #ff0000; }
-        input[type="password"] { width: 100%; padding: 12px; background: #222; border: 1px solid #555; color: #fff; border-radius: 8px; font-size: 16px; text-align: center; margin-bottom: 15px; }
+        .admin-close { position: absolute; top: 10px; right: 15px; font-size: 24px; color: white; cursor: pointer; }
+        .mode-btn { padding: 10px; margin: 5px 0; background: #333; border: 1px solid #555; color: white; border-radius: 8px; cursor: pointer; width: 100%; text-align: left; }
+        .mode-btn.active { background: red; }
+        input[type="password"] { width: 100%; padding: 12px; background: #222; border: 1px solid #555; color: white; border-radius: 8px; font-size: 16px; text-align: center; margin-bottom: 15px; }
     </style>
 </head>
 <body>
     <div class="app-container">
         <div class="banner-container">
-            <img src="banner.png" alt="RB eSports" class="banner">
+            <img src="banner.png" class="banner">
         </div>
 
         <div class="balance-card">
-            <span class="balance-label">Ваш баланс:</span>
-            <span class="balance-value" id="user-balance">Загрузка...</span> 🪙
+            <span>Баланс:</span>
+            <span class="balance-value" id="user-balance">0</span> 🪙
         </div>
 
         <div class="tabs">
-            <button class="tab-btn active" id="btn-tab-roulette" onclick="switchTab('roulette')">🎡 Рулетка</button>
-            <button class="tab-btn" id="btn-tab-shop" onclick="switchTab('shop')">🛒 Магазин</button>
-            <button class="tab-btn" id="btn-tab-code" onclick="switchTab('code')" style="display:none;">💻 Взлом</button>
+            <button class="tab-btn active" id="tab-btn-roulette" onclick="switchTab('roulette')">🎡 Рулетка</button>
+            <button class="tab-btn" id="tab-btn-shop" onclick="switchTab('shop')">🛒 Магазин</button>
+            <button class="tab-btn" id="tab-btn-code" onclick="switchTab('code')" style="display: none;">💻 Взлом</button>
         </div>
 
+        <!-- РУЛЕТКА -->
         <div id="tab-roulette" class="tab-content active">
-            <div class="roulette-window"><div class="roulette-result" id="roulette-display">🎲</div></div>
+            <div class="roulette-window" id="roulette-display">🎲</div>
             <div class="colors-grid" id="colors-grid">
                 <button class="color-btn yellow" onclick="selectColor('yellow', 2)">🟨 x2</button>
                 <button class="color-btn green" onclick="selectColor('green', 4)">🟩 x4</button>
@@ -87,7 +91,7 @@
                 <button class="color-btn orange" onclick="selectColor('orange', 21)">🟧 x21</button>
             </div>
             <div class="bet-area" id="bet-area">
-                <p style="margin-bottom:10px;">Ставка на <span id="selected-color-name" style="color:#ffcc00; font-weight:bold;"></span></p>
+                <p style="margin-bottom:10px;">Ставка на <span id="sel-color-name" style="color:#ffcc00; font-weight:bold;"></span></p>
                 <div class="bet-grid">
                     <button class="bet-btn" onclick="spin(10)">10 🪙</button>
                     <button class="bet-btn" onclick="spin(50)">50 🪙</button>
@@ -98,12 +102,14 @@
             </div>
         </div>
 
+        <!-- МАГАЗИН -->
         <div id="tab-shop" class="tab-content">
             <div class="shop-grid" id="shop-grid"></div>
         </div>
 
+        <!-- ВЗЛОМ -->
         <div id="tab-code" class="tab-content">
-            <div class="code-container">
+            <div class="code-area">
                 <h3>Взлом кода</h3>
                 <p>Введи число от 1 до 100</p>
                 <input type="number" id="code-input" placeholder="Твое число..." min="1" max="100">
@@ -112,36 +118,35 @@
         </div>
     </div>
 
+    <!-- Админка -->
     <div class="admin-trigger" onclick="openAdminAuth()">AP</div>
-
     <div class="admin-panel" id="admin-auth-panel">
         <span class="admin-close" onclick="closeAdminPanels()">&times;</span>
-        <h2 style="text-align:center; margin-top: 50px;">Admin Access</h2>
+        <h2 style="text-align:center; margin-top: 50px;">Admin</h2>
         <input type="password" id="admin-pass-input" placeholder="Password">
         <button class="action-btn" onclick="checkPassword()">Войти</button>
     </div>
-
     <div class="admin-panel" id="admin-settings-panel">
         <span class="admin-close" onclick="closeAdminPanels()">&times;</span>
         <h2 style="text-align:center;">Настройки</h2>
         <button class="mode-btn" id="mode-fair" onclick="setAdminMode('fair')">⚖️ Честный</button>
         <button class="mode-btn" id="mode-negative" onclick="setAdminMode('negative')">🔴 Казино в плюсе</button>
         <button class="mode-btn" id="mode-positive" onclick="setAdminMode('positive')">🟢 Казино в минусе</button>
-        <button class="action-btn" style="margin-top:20px; background:#ff0000;" onclick="applyAdminSettings()">Применить</button>
+        <button class="action-btn" style="margin-top:20px; background:red;" onclick="applyAdminSettings()">Применить</button>
     </div>
 
     <script>
-        // Инициализация
+        // Проверка: открыто ли в Telegram
         const tg = window.Telegram.WebApp;
-        tg.expand();
-
+        
+        // Убираем "Загрузка..."
         const urlParams = new URLSearchParams(window.location.search);
         let currentBalance = parseInt(urlParams.get('balance')) || 0;
         let isHackActive = urlParams.get('hack') === '1';
         document.getElementById('user-balance').innerText = currentBalance;
 
         if (isHackActive) {
-            document.getElementById('btn-tab-code').style.display = 'block';
+            document.getElementById('tab-btn-code').style.display = 'block';
         }
 
         // МАГАЗИН
@@ -150,59 +155,62 @@
             { uc: 1800, price: 2500 }, { uc: 3850, price: 5000 }, { uc: 8100, price: 10000 },
             { uc: 16200, price: 20000 }, { uc: 24300, price: 30000 }, { uc: 32400, price: 40000 }, { uc: 40500, price: 50000 }
         ];
-
-        function renderShop() {
-            const grid = document.getElementById('shop-grid');
-            grid.innerHTML = '';
-            shopItems.forEach(item => {
-                const div = document.createElement('div');
-                div.className = 'shop-item';
-                div.innerHTML = `
-                    <img src="uc_icon.png" class="shop-item-img" onerror="this.src='https://via.placeholder.com/60x60?text=UC'">
-                    <div class="shop-item-title">${item.uc} UC</div>
-                    <div class="shop-item-price">${item.price} 🪙</div>
+        const grid = document.getElementById('shop-grid');
+        shopItems.forEach(item => {
+            grid.innerHTML += `
+                <div class="shop-item">
+                    <img src="uc_icon.png" onerror="this.src='https://via.placeholder.com/60x60?text=UC'">
+                    <div style="font-weight:bold; color:#ffcc00;">${item.uc} UC</div>
+                    <div style="font-size:12px; color:#aaa; margin-bottom:8px;">${item.price} 🪙</div>
                     <button class="buy-btn" onclick="buyItem(${item.uc}, ${item.price})">Купить</button>
-                `;
-                grid.appendChild(div);
-            });
-        }
-        renderShop();
+                </div>
+            `;
+        });
 
-        function switchTab(tabName) {
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-            document.getElementById(`btn-tab-${tabName}`).classList.add('active');
-            document.getElementById(`tab-${tabName}`).classList.add('active');
+        // НАВИГАЦИЯ
+        function switchTab(name) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById(`tab-btn-${name}`).classList.add('active');
+            document.getElementById(`tab-${name}`).classList.add('active');
         }
 
+        // РУЛЕТКА
         let selectedColor = null;
-        function selectColor(color, multiplier) {
+        function selectColor(color, mult) {
             selectedColor = color;
             document.getElementById('colors-grid').style.display = 'none';
             document.getElementById('bet-area').classList.add('active');
             const names = { yellow: 'Жёлтый', green: 'Зелёный', blue: 'Синий', purple: 'Фиолетовый', orange: 'Оранжевый' };
-            document.getElementById('selected-color-name').innerText = names[color];
+            document.getElementById('sel-color-name').innerText = names[color];
         }
-
         function cancelBet() {
             document.getElementById('colors-grid').style.display = 'grid';
             document.getElementById('bet-area').classList.remove('active');
         }
-
-        // ОТПРАВКА ДАННЫХ
-        function spin(betAmount) {
-            if (betAmount > currentBalance) { alert("❌ Недостаточно фишек!"); return; }
-            tg.sendData(JSON.stringify({ action: "spin", bet: betAmount, color: selectedColor }));
+        
+        // ОТПРАВКА ДАННЫХ В БОТ
+        function spin(bet) {
+            if (bet > currentBalance) { alert("❌ Недостаточно фишек!"); return; }
+            
+            // Если открыто НЕ в телеге (например, в браузере), показываем сообщение
+            if (!tg || !tg.initData) {
+                alert("Вы открыли игру в браузере. Кнопки работают только внутри Telegram!");
+                return;
+            }
+            tg.sendData(JSON.stringify({ action: "spin", bet: bet, color: selectedColor }));
         }
 
         function buyItem(uc, price) {
-            if (currentBalance < price) { alert("❌ Недостаточно фишек!"); return; }
+            if (price > currentBalance) { alert("❌ Недостаточно фишек!"); return; }
+            if (!tg || !tg.initData) { alert("Откройте игру через бота!"); return; }
             tg.sendData(JSON.stringify({ action: "buy", uc: uc, price: price }));
         }
 
         function tryCode() {
             const guess = parseInt(document.getElementById('code-input').value);
-            if (isNaN(guess) || guess < 1 || guess > 100) { alert("❌ Введи число от 1 до 100"); return; }
+            if (isNaN(guess) || guess < 1 || guess > 100) { alert("Введи от 1 до 100"); return; }
+            if (!tg || !tg.initData) { alert("Откройте игру через бота!"); return; }
             tg.sendData(JSON.stringify({ action: "hack", guess: guess }));
         }
 
