@@ -9,48 +9,68 @@
 </head>
 <body>
     <div class="app-container">
-        <!-- Колесо (вращается) -->
-        <div class="wheel-container">
-            <div class="wheel-image" id="wheel-img"></div>
-            <!-- Указатель сверху -->
-            <div class="pointer"></div>
+        <!-- Баннер -->
+        <div class="banner-container">
+            <img src="banner.png" alt="RB eSports" class="banner">
         </div>
 
-        <!-- Верхняя панель (Баланс) -->
-        <div class="top-bar">
-            <div class="balance-badge">
-                Баланс: <span id="user-balance">0</span> 🪙
+        <!-- Баланс -->
+        <div class="balance-card">
+            <span class="balance-label">Ваш баланс:</span>
+            <span class="balance-value" id="user-balance">Загрузка...</span> <span class="coin-icon">🪙</span>
+        </div>
+
+        <!-- Навигация -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab(event, 'roulette')">🎡 Рулетка</button>
+            <button class="tab-btn" onclick="switchTab(event, 'shop')">🛒 Магазин</button>
+            <button class="tab-btn" onclick="switchTab(event, 'code')">💻 Взлом</button>
+        </div>
+
+        <!-- РАЗДЕЛ: РУЛЕТКА -->
+        <div id="tab-roulette" class="tab-content active">
+            <div class="roulette-window">
+                <div class="roulette-result" id="roulette-display">🎲</div>
             </div>
-        </div>
 
-        <!-- Нижняя панель управления -->
-        <div class="bottom-panel">
+            <div class="colors-grid" id="colors-grid">
+                <button class="color-btn yellow" onclick="selectColor('yellow', 2)">🟨 x2</button>
+                <button class="color-btn green" onclick="selectColor('green', 4)">🟩 x4</button>
+                <button class="color-btn blue" onclick="selectColor('blue', 6)">🟦 x6</button>
+                <button class="color-btn purple" onclick="selectColor('purple', 11)">🟪 x11</button>
+                <button class="color-btn orange" onclick="selectColor('orange', 21)">🟧 x21</button>
+            </div>
+
             <div class="bet-area hidden" id="bet-area">
-                <p>Ставка на <span id="selected-color-name"></span> (x<span id="selected-multiplier"></span>)</p>
+                <p class="bet-label">Ставка на <span id="selected-color-name"></span> (x<span id="selected-multiplier"></span>)</p>
                 <div class="bet-grid">
-                    <button class="bet-btn" onclick="spin(10)">10</button>
-                    <button class="bet-btn" onclick="spin(50)">50</button>
-                    <button class="bet-btn" onclick="spin(100)">100</button>
-                    <button class="bet-btn" onclick="spin(500)">500</button>
-                </div>
-                <!-- Блок своей суммы -->
-                <div class="custom-bet-row">
-                    <input type="number" id="custom-bet" placeholder="Своя сумма" min="10">
-                    <button class="bet-btn custom-btn" onclick="spinCustom()">Ввести</button>
+                    <button class="bet-btn" onclick="spin(10)">10 🪙</button>
+                    <button class="bet-btn" onclick="spin(50)">50 🪙</button>
+                    <button class="bet-btn" onclick="spin(100)">100 🪙</button>
+                    <button class="bet-btn" onclick="spin(500)">500 🪙</button>
                 </div>
                 <button class="cancel-btn" onclick="cancelBet()">Отмена</button>
             </div>
 
-            <div class="colors-panel" id="colors-panel">
-                <button class="color-btn yellow" onclick="selectColor('yellow', 2)">x2</button>
-                <button class="color-btn green" onclick="selectColor('green', 4)">x4</button>
-                <button class="color-btn blue" onclick="selectColor('blue', 6)">x6</button>
-                <button class="color-btn purple" onclick="selectColor('purple', 11)">x11</button>
-                <button class="color-btn orange" onclick="selectColor('orange', 21)">x21</button>
-            </div>
-            
             <div class="result-text" id="result-text"></div>
         </div>
+
+        <!-- РАЗДЕЛ: МАГАЗИН -->
+        <div id="tab-shop" class="tab-content">
+            <div class="shop-grid" id="shop-grid"></div>
+        </div>
+
+        <!-- РАЗДЕЛ: ВЗЛОМ КОДА -->
+        <div id="tab-code" class="tab-content">
+            <div class="code-container">
+                <h3>Взлом кода</h3>
+                <p>Введи число от 1 до 100</p>
+                <input type="number" id="code-input" placeholder="Твое число..." min="1" max="100">
+                <button class="action-btn" onclick="tryCode()">Взломать</button>
+                <div class="result-text" id="code-result-text"></div>
+            </div>
+        </div>
+
     </div>
     <script src="app.js"></script>
 </body>
