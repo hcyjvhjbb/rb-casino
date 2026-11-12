@@ -1,182 +1,205 @@
-const tg = window.Telegram.WebApp;
-tg.expand();
-
-let currentBalance = 10000; // Стартовый баланс для теста
-document.getElementById('user-balance').innerText = currentBalance;
-
-// --- НАВИГАЦИЯ ---
-function switchTab(tabName) {
-    // Убираем активный класс со всех кнопок и контента
-    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-    
-    // Добавляем активный класс нужным
-    event.target.classList.add('active');
-    document.getElementById(`tab-${tabName}`).classList.add('active');
+// RB Casino Mini App — баланс всегда загружается с Python API, а не хранится в браузере.
+const tg = window.Telegram?.WebApp;
+if (tg) {
+    tg.ready();
+    tg.expand();
 }
 
-// --- РУЛЕТКА ---
-const colorMap = {
-    'yellow': { emoji: '🟨', name: 'Жёлтый' },
-    'green':  { emoji: '🟩', name: 'Зелёный' },
-    'blue':   { emoji: '🟦', name: 'Синий' },
-    'purple': { emoji: '🟪', name: 'Фиолетовый' },
-    'orange': { emoji: '🟧', name: 'Оранжевый' }
-};
-const allEmojis = ['🟨', '🟩', '🟦', '🟪', '🟧'];
-
+const API_BASE_URL = "https://YOUR-CLOUDFLARE-TUNNEL.trycloudflare.com"; // Замени на HTTPS URL своего туннеля.
+let currentBalance = null;
 let selectedColor = null;
 let selectedMultiplier = 0;
-let isSpinning = false;
+let isBusy = false;
 
-function selectColor(color, multiplier) {
-    if (isSpinning) return;
-    selectedColor = color;
-    selectedMultiplier = multiplier;
-    
-    document.getElementById('colors-grid').classList.add('hidden');
-    document.getElementById('bet-area').classList.remove('hidden');
-    document.getElementById('selected-color-name').innerText = colorMap[color].name;
-    document.getElementById('selected-multiplier').innerText = multiplier;
-    document.getElementById('result-text').innerText = "";
+const colorMap = {
+    yellow: { emoji: "🟨", name: "Жёлтый", multiplier: 2 },
+    green:  { emoji: "🟩", name: "Зелёный", multiplier: 4 },
+    blue:   { emoji: "🟦", name: "Синий", multiplier: 6 },
+    purple: { emoji: "🟪", name: "Фиолетовый", multiplier: 11 },
+    orange: { emoji: "🟧", name: "Оранжевый", multiplier: 21 }
+};
+const allEmojis = Object.values(colorMap).map(x => x.emoji);
+const shopItems = [
+    { uc: 60, price: 100 }, { uc: 325, price: 500 }, { uc: 660, price: 1000 },
+    { uc: 1800, price: 2500 }, { uc: 3850, price: 5000 }, { uc: 8100, price: 10000 },
+    { uc: 16200, price: 20000 }, { uc: 24300, price: 30000 },
+    { uc: 32400, price: 40000 }, { uc: 40500, price: 50000 }
+];
+
+function setBalance(value) {
+    currentBalance = Number(value);
+    document.getElementById("user-balance").innerText =
+        Number.isFinite(currentBalance) ? currentBalance.toLocaleString("ru-RU") : "—";
 }
+
+function setBusy(value) {
+    isBusy = value;
+    document.querySelectorAll("button").forEach(button => {
+        button.disabled = value;
+    });
+}
+
+async function apiRequest(path, extra = {}) {
+    if (!tg || !tg.initData) {
+        throw new Error("Открой Mini App через кнопку в Telegram, а не обычной ссылкой.");
+    }
+    if (API_BASE_URL.includes("YOUR-CLOUDFLARE-TUNNEL")) {
+        throw new Error("Сначала укажи HTTPS-адрес API в app.js.");
+    }
+    const response = await fetch(`${API_BASE_URL}${path}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ initData: tg.initData, ...extra })
+    });
+    let data;
+    try { data = await response.json(); }
+    catch { throw new Error("API вернул некорректный ответ."); }
+    if (!response.ok || !data.ok) {
+        if (typeof data.balance === "number") setBalance(data.balance);
+        throw new Error(data.error || data.message || "Ошибка сервера.");
+    }
+    return data;
+}
+
+function showError(elementId, error) {
+    const el = document.getElementById(elementId);
+    if (el) el.innerText = `❌ ${error.message || error}`;
+}
+
+async function refreshBalance() {
+    try {
+        const data = await apiRequest("/api/balance");
+        setBalance(data.balance);
+    } catch (error) {
+        setBalance(null);
+        showError("result-text", error);
+    }
+}
+
+// Навигация: не используем глобальный event, из-за которого ломались кнопки вкладок.
+function switchTab(tabName) {
+    document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
+    document.querySelectorAll(".tab-content").forEach(tab => tab.classList.remove("active"));
+    const target = document.getElementById(`tab-${tabName}`);
+    if (target) target.classList.add("active");
+    const button = [...document.querySelectorAll(".tab-btn")]
+        .find(btn => (btn.getAttribute("onclick") || "").includes(`'${tabName}'`));
+    if (button) button.classList.add("active");
+}
+window.switchTab = switchTab;
+
+function selectColor(color) {
+    if (isBusy || !colorMap[color]) return;
+    selectedColor = color;
+    selectedMultiplier = colorMap[color].multiplier;
+    document.getElementById("colors-grid").classList.add("hidden");
+    document.getElementById("bet-area").classList.remove("hidden");
+    document.getElementById("selected-color-name").innerText = colorMap[color].name;
+    document.getElementById("selected-multiplier").innerText = selectedMultiplier;
+    document.getElementById("result-text").innerText = "";
+}
+window.selectColor = selectColor;
 
 function cancelBet() {
     selectedColor = null;
-    document.getElementById('colors-grid').classList.remove('hidden');
-    document.getElementById('bet-area').classList.add('hidden');
+    document.getElementById("colors-grid").classList.remove("hidden");
+    document.getElementById("bet-area").classList.add("hidden");
 }
+window.cancelBet = cancelBet;
 
-function spin(betAmount) {
-    if (isSpinning) return;
-    if (betAmount > currentBalance) {
-        document.getElementById('result-text').innerText = "❌ Недостаточно фишек!";
-        return;
+async function spin(betAmount) {
+    if (isBusy || !selectedColor) return;
+    setBusy(true);
+    const result = document.getElementById("result-text");
+    result.innerText = "Крутим...";
+    document.getElementById("bet-area").classList.add("hidden");
+    try {
+        // Ставка и результат рассчитываются на сервере, а не в браузере.
+        const data = await apiRequest("/api/spin", { color: selectedColor, bet: betAmount });
+        const display = document.getElementById("roulette-display");
+        const rouletteWindow = document.querySelector(".roulette-window");
+        let ticks = 0;
+        const timer = setInterval(() => {
+            display.innerText = allEmojis[Math.floor(Math.random() * allEmojis.length)];
+            rouletteWindow.style.transform = `translate(${Math.random() * 4 - 2}px, ${Math.random() * 4 - 2}px)`;
+            if (++ticks >= 22) {
+                clearInterval(timer);
+                rouletteWindow.style.transform = "none";
+                display.innerText = data.emoji;
+                setBalance(data.balance);
+                result.innerHTML = data.won
+                    ? `🎉 <span style="color:#32cd32">ПОБЕДА!</span><br>Выигрыш: +${data.win} 🪙`
+                    : `😔 <span style="color:#ff3333">Проигрыш.</span><br>Выпало: ${data.emoji}`;
+                selectedColor = null;
+                setTimeout(() => document.getElementById("colors-grid").classList.remove("hidden"), 1200);
+                setBusy(false);
+            }
+        }, 55);
+    } catch (error) {
+        result.innerText = `❌ ${error.message}`;
+        document.getElementById("bet-area").classList.remove("hidden");
+        setBusy(false);
     }
-
-    isSpinning = true;
-    currentBalance -= betAmount;
-    document.getElementById('user-balance').innerText = currentBalance;
-    document.getElementById('result-text').innerText = "Крутим...";
-    document.getElementById('bet-area').classList.add('hidden');
-
-    const display = document.getElementById('roulette-display');
-    const rouletteWindow = document.querySelector('.roulette-window');
-    
-    let spins = 0;
-    const maxSpins = 30;
-    const spinInterval = setInterval(() => {
-        display.innerText = allEmojis[Math.floor(Math.random() * allEmojis.length)];
-        rouletteWindow.style.transform = `translate(${Math.random()*4-2}px, ${Math.random()*4-2}px)`;
-        spins++;
-
-        if (spins >= maxSpins) {
-            clearInterval(spinInterval);
-            rouletteWindow.style.transform = 'none';
-            finishSpin(betAmount);
-        }
-    }, 50);
 }
-
-function finishSpin(betAmount) {
-    const winColor = allEmojis[Math.floor(Math.random() * allEmojis.length)];
-    document.getElementById('roulette-display').innerText = winColor;
-    isSpinning = false;
-
-    const myEmoji = colorMap[selectedColor].emoji;
-
-    if (winColor === myEmoji) {
-        const winAmount = betAmount * selectedMultiplier;
-        currentBalance += winAmount;
-        document.getElementById('user-balance').innerText = currentBalance;
-        document.getElementById('result-text').innerHTML = `🎉 <span style="color:#32cd32">ПОБЕДА!</span><br>Выигрыш: +${winAmount} 🪙`;
-    } else {
-        document.getElementById('result-text').innerHTML = `😔 <span style="color:#ff3333">Проигрыш.</span><br>Выпало: ${winColor}`;
-    }
-
-    setTimeout(() => {
-        document.getElementById('colors-grid').classList.remove('hidden');
-        selectedColor = null;
-    }, 2000);
-}
-
-// --- МАГАЗИН ---
-const shopItems = [
-    { uc: 60, price: 100 },
-    { uc: 325, price: 500 },
-    { uc: 660, price: 1000 },
-    { uc: 1800, price: 2500 },
-    { uc: 3850, price: 5000 },
-    { uc: 8100, price: 10000 },
-    { uc: 16200, price: 20000 },
-    { uc: 24300, price: 30000 },
-    { uc: 32400, price: 40000 },
-    { uc: 40500, price: 50000 }
-];
+window.spin = spin;
 
 function renderShop() {
-    const grid = document.getElementById('shop-grid');
-    grid.innerHTML = '';
-    
+    const grid = document.getElementById("shop-grid");
+    if (!grid) return;
+    grid.innerHTML = "";
     shopItems.forEach(item => {
-        const div = document.createElement('div');
-        div.className = 'shop-item';
+        const div = document.createElement("div");
+        div.className = "shop-item";
         div.innerHTML = `
             <img src="uc_icon.png" alt="${item.uc} UC" class="shop-item-img">
             <div class="shop-item-title">${item.uc} UC</div>
-            <div class="shop-item-price">${item.price} 🪙</div>
-            <button class="buy-btn" onclick="buyItem(${item.uc}, ${item.price})">Купить</button>
-        `;
+            <div class="shop-item-price">${item.price.toLocaleString("ru-RU")} 🪙</div>
+            <button class="buy-btn" type="button">Купить</button>`;
+        div.querySelector("button").addEventListener("click", () => buyItem(item.uc));
         grid.appendChild(div);
     });
 }
 
-function buyItem(uc, price) {
-    const resText = document.getElementById('shop-result-text');
-    if (currentBalance < price) {
-        resText.innerHTML = `❌ <span style="color:#ff3333">Недостаточно фишек!</span> Нужно ${price} 🪙`;
-        return;
+async function buyItem(uc) {
+    if (isBusy) return;
+    const result = document.getElementById("shop-result-text");
+    setBusy(true);
+    result.innerText = "Обрабатываем покупку...";
+    try {
+        const data = await apiRequest("/api/buy", { uc });
+        setBalance(data.balance);
+        result.innerHTML = `✅ <span style="color:#32cd32">Заявка принята!</span><br>Ты купил ${data.uc} UC за ${data.price} 🪙. Ожидай выдачи от администратора.`;
+    } catch (error) {
+        result.innerText = `❌ ${error.message}`;
+    } finally {
+        setBusy(false);
     }
-    
-    currentBalance -= price;
-    document.getElementById('user-balance').innerText = currentBalance;
-    resText.innerHTML = `✅ <span style="color:#32cd32">Успешно!</span> Ты купил ${uc} UC.<br>Ожидай выдачи от админа.`;
-    
-    // В реальном приложении здесь будет запрос к боту
-    // tg.sendData(JSON.stringify({ action: 'buy', uc: uc, price: price }));
 }
+window.buyItem = buyItem;
 
-// --- ВЗЛОМ КОДА ---
-let secretCode = Math.floor(Math.random() * 100) + 1; // Секретное число
+// Игра «Взлом кода» оставлена визуальной. Она не меняет баланс и не обещает фиктивное начисление UC.
+let secretCode = Math.floor(Math.random() * 100) + 1;
 let isCodeActive = true;
-
 function tryCode() {
-    const input = document.getElementById('code-input');
-    const resText = document.getElementById('code-result-text');
-    const guess = parseInt(input.value);
-
-    if (!isCodeActive) {
-        resText.innerHTML = "⛔ Игра уже завершена!";
-        return;
+    const input = document.getElementById("code-input");
+    const resText = document.getElementById("code-result-text");
+    const guess = Number.parseInt(input.value, 10);
+    if (!isCodeActive) { resText.innerText = "⛔ Игра уже завершена!"; return; }
+    if (!Number.isInteger(guess) || guess < 1 || guess > 100) {
+        resText.innerText = "❌ Введи число от 1 до 100!"; return;
     }
-
-    if (isNaN(guess) || guess < 1 || guess > 100) {
-        resText.innerHTML = "❌ Введи число от 1 до 100!";
-        return;
-    }
-
     if (guess === secretCode) {
-        resText.innerHTML = `🎉 <span style="color:#32cd32">ВЗЛОМ УСПЕШЕН!</span><br>Ты угадал число ${secretCode}!<br>Приз: 60 UC.`;
+        resText.innerText = `🎉 ВЗЛОМ УСПЕШЕН! Ты угадал число ${secretCode}.`;
         isCodeActive = false;
         input.disabled = true;
-    } else if (guess < secretCode) {
-        resText.innerHTML = `📈 <span style="color:#ffcc00">Загаданное число больше.</span>`;
     } else {
-        resText.innerHTML = `📉 <span style="color:#ffcc00">Загаданное число меньше.</span>`;
+        resText.innerText = guess < secretCode
+            ? "📈 Загаданное число больше."
+            : "📉 Загаданное число меньше.";
     }
-    
-    input.value = '';
+    input.value = "";
 }
+window.tryCode = tryCode;
 
-// Инициализация магазина при загрузке
 renderShop();
+refreshBalance();
