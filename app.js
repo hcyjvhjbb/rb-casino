@@ -1,182 +1,122 @@
 const tg = window.Telegram.WebApp;
 tg.expand();
 
-let currentBalance = 10000; // Стартовый баланс для теста
-document.getElementById('user-balance').innerText = currentBalance;
+// --- 1. СИНХРОНИЗАЦИЯ БАЛАНСА ---
+// Бот передаст баланс при открытии
+let currentBalance = parseInt(tg.initDataUnsafe?.user ? 1000 : 0); 
+// Для теста ставим 1000, в реале бот будет присылать реальный
+// (пока что мы просто показываем заглушку, но данные уйдут в бот)
+document.getElementById('user-balance').innerText = "Синх..."; 
+setTimeout(() => { document.getElementById('user-balance').innerText = "1000"; }, 500);
 
-// --- НАВИГАЦИЯ ---
-function switchTab(tabName) {
-    // Убираем активный класс со всех кнопок и контента
-    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-    
-    // Добавляем активный класс нужным
-    event.target.classList.add('active');
-    document.getElementById(`tab-${tabName}`).classList.add('active');
-}
-
-// --- РУЛЕТКА ---
-const colorMap = {
-    'yellow': { emoji: '🟨', name: 'Жёлтый' },
-    'green':  { emoji: '🟩', name: 'Зелёный' },
-    'blue':   { emoji: '🟦', name: 'Синий' },
-    'purple': { emoji: '🟪', name: 'Фиолетовый' },
-    'orange': { emoji: '🟧', name: 'Оранжевый' }
+// --- 2. ЛОГИКА РУЛЕТКИ ---
+const colorsData = {
+    'yellow': { name: 'Жёлтый', mult: 2, angle: 0 }, // Углы для остановки
+    'green':  { name: 'Зелёный', mult: 4, angle: 72 },
+    'blue':   { name: 'Синий', mult: 6, angle: 144 },
+    'purple': { name: 'Фиолетовый', mult: 11, angle: 216 },
+    'orange': { name: 'Оранжевый', mult: 21, angle: 288 }
 };
-const allEmojis = ['🟨', '🟩', '🟦', '🟪', '🟧'];
 
 let selectedColor = null;
-let selectedMultiplier = 0;
+let selectedMult = 0;
 let isSpinning = false;
+let currentRotation = 0;
 
-function selectColor(color, multiplier) {
+function selectColor(color, mult) {
     if (isSpinning) return;
     selectedColor = color;
-    selectedMultiplier = multiplier;
-    
-    document.getElementById('colors-grid').classList.add('hidden');
+    selectedMult = mult;
+    document.getElementById('colors-panel').classList.add('hidden');
     document.getElementById('bet-area').classList.remove('hidden');
-    document.getElementById('selected-color-name').innerText = colorMap[color].name;
-    document.getElementById('selected-multiplier').innerText = multiplier;
+    document.getElementById('selected-color-name').innerText = colorsData[color].name;
+    document.getElementById('selected-multiplier').innerText = mult;
     document.getElementById('result-text').innerText = "";
 }
 
 function cancelBet() {
     selectedColor = null;
-    document.getElementById('colors-grid').classList.remove('hidden');
+    document.getElementById('colors-panel').classList.remove('hidden');
     document.getElementById('bet-area').classList.add('hidden');
 }
 
 function spin(betAmount) {
+    executeSpin(betAmount);
+}
+
+function spinCustom() {
+    const val = parseInt(document.getElementById('custom-bet').value);
+    if (isNaN(val) || val < 10) {
+        document.getElementById('result-text').innerText = "❌ Мин. ставка 10 🪙";
+        return;
+    }
+    executeSpin(val);
+}
+
+function executeSpin(betAmount) {
     if (isSpinning) return;
-    if (betAmount > currentBalance) {
+    // Проверка баланса (условная, реальная проверка будет в боте)
+    if (betAmount > 1000) { 
         document.getElementById('result-text').innerText = "❌ Недостаточно фишек!";
         return;
     }
 
     isSpinning = true;
-    currentBalance -= betAmount;
-    document.getElementById('user-balance').innerText = currentBalance;
     document.getElementById('result-text').innerText = "Крутим...";
     document.getElementById('bet-area').classList.add('hidden');
 
-    const display = document.getElementById('roulette-display');
-    const rouletteWindow = document.querySelector('.roulette-window');
-    
-    let spins = 0;
-    const maxSpins = 30;
-    const spinInterval = setInterval(() => {
-        display.innerText = allEmojis[Math.floor(Math.random() * allEmojis.length)];
-        rouletteWindow.style.transform = `translate(${Math.random()*4-2}px, ${Math.random()*4-2}px)`;
-        spins++;
+    // Генерируем результат по шансам
+    const rand = Math.random() * 100;
+    let winColorKey = 'yellow';
+    if (rand < 48) winColorKey = 'yellow';
+    else if (rand < 72) winColorKey = 'green'; // 48 + 24
+    else if (rand < 88) winColorKey = 'blue';  // 72 + 16
+    else if (rand < 96) winColorKey = 'purple';// 88 + 8
+    else winColorKey = 'orange';               // 96 + 4
 
-        if (spins >= maxSpins) {
-            clearInterval(spinInterval);
-            rouletteWindow.style.transform = 'none';
-            finishSpin(betAmount);
-        }
-    }, 50);
+    const targetAngle = colorsData[winColorKey].angle;
+    // Крутим минимум 5 полных оборотов (1800 градусов) + нужный угол
+    const spins = 5; 
+    const finalRotation = currentRotation + (spins * 360) + (targetAngle - (currentRotation % 360));
+    
+    currentRotation = finalRotation;
+    const wheel = document.getElementById('wheel-img');
+    
+    // Запускаем CSS анимацию
+    wheel.style.transform = `rotate(${currentRotation}deg)`;
+
+    // Ждем окончания анимации (4 секунды в CSS)
+    setTimeout(() => {
+        finishSpin(winColorKey, betAmount);
+    }, 4100);
 }
 
-function finishSpin(betAmount) {
-    const winColor = allEmojis[Math.floor(Math.random() * allEmojis.length)];
-    document.getElementById('roulette-display').innerText = winColor;
+function finishSpin(winColorKey, betAmount) {
     isSpinning = false;
-
-    const myEmoji = colorMap[selectedColor].emoji;
-
-    if (winColor === myEmoji) {
-        const winAmount = betAmount * selectedMultiplier;
-        currentBalance += winAmount;
-        document.getElementById('user-balance').innerText = currentBalance;
-        document.getElementById('result-text').innerHTML = `🎉 <span style="color:#32cd32">ПОБЕДА!</span><br>Выигрыш: +${winAmount} 🪙`;
+    const won = winColorKey === selectedColor;
+    
+    let resultMsg = "";
+    if (won) {
+        const winAmount = betAmount * selectedMult;
+        resultMsg = `🎉 ПОБЕДА! Выигрыш: +${winAmount} 🪙`;
     } else {
-        document.getElementById('result-text').innerHTML = `😔 <span style="color:#ff3333">Проигрыш.</span><br>Выпало: ${winColor}`;
+        resultMsg = `😔 Проигрыш. Выпало: ${colorsData[winColorKey].name}`;
     }
+    
+    document.getElementById('result-text').innerHTML = resultMsg;
 
+    // ОТПРАВЛЯЕМ ДАННЫЕ В БОТА
+    // Бот закроет окно и выдаст результат в чате
+    tg.sendData(JSON.stringify({
+        action: "spin",
+        bet: betAmount,
+        color: selectedColor,
+        result_color: winColorKey
+    }));
+    
+    // Возвращаем меню через 2 секунды (если бот не закроет сам)
     setTimeout(() => {
-        document.getElementById('colors-grid').classList.remove('hidden');
+        document.getElementById('colors-panel').classList.remove('hidden');
         selectedColor = null;
     }, 2000);
 }
-
-// --- МАГАЗИН ---
-const shopItems = [
-    { uc: 60, price: 100 },
-    { uc: 325, price: 500 },
-    { uc: 660, price: 1000 },
-    { uc: 1800, price: 2500 },
-    { uc: 3850, price: 5000 },
-    { uc: 8100, price: 10000 },
-    { uc: 16200, price: 20000 },
-    { uc: 24300, price: 30000 },
-    { uc: 32400, price: 40000 },
-    { uc: 40500, price: 50000 }
-];
-
-function renderShop() {
-    const grid = document.getElementById('shop-grid');
-    grid.innerHTML = '';
-    
-    shopItems.forEach(item => {
-        const div = document.createElement('div');
-        div.className = 'shop-item';
-        div.innerHTML = `
-            <img src="uc_icon.png" alt="${item.uc} UC" class="shop-item-img">
-            <div class="shop-item-title">${item.uc} UC</div>
-            <div class="shop-item-price">${item.price} 🪙</div>
-            <button class="buy-btn" onclick="buyItem(${item.uc}, ${item.price})">Купить</button>
-        `;
-        grid.appendChild(div);
-    });
-}
-
-function buyItem(uc, price) {
-    const resText = document.getElementById('shop-result-text');
-    if (currentBalance < price) {
-        resText.innerHTML = `❌ <span style="color:#ff3333">Недостаточно фишек!</span> Нужно ${price} 🪙`;
-        return;
-    }
-    
-    currentBalance -= price;
-    document.getElementById('user-balance').innerText = currentBalance;
-    resText.innerHTML = `✅ <span style="color:#32cd32">Успешно!</span> Ты купил ${uc} UC.<br>Ожидай выдачи от админа.`;
-    
-    // В реальном приложении здесь будет запрос к боту
-    // tg.sendData(JSON.stringify({ action: 'buy', uc: uc, price: price }));
-}
-
-// --- ВЗЛОМ КОДА ---
-let secretCode = Math.floor(Math.random() * 100) + 1; // Секретное число
-let isCodeActive = true;
-
-function tryCode() {
-    const input = document.getElementById('code-input');
-    const resText = document.getElementById('code-result-text');
-    const guess = parseInt(input.value);
-
-    if (!isCodeActive) {
-        resText.innerHTML = "⛔ Игра уже завершена!";
-        return;
-    }
-
-    if (isNaN(guess) || guess < 1 || guess > 100) {
-        resText.innerHTML = "❌ Введи число от 1 до 100!";
-        return;
-    }
-
-    if (guess === secretCode) {
-        resText.innerHTML = `🎉 <span style="color:#32cd32">ВЗЛОМ УСПЕШЕН!</span><br>Ты угадал число ${secretCode}!<br>Приз: 60 UC.`;
-        isCodeActive = false;
-        input.disabled = true;
-    } else if (guess < secretCode) {
-        resText.innerHTML = `📈 <span style="color:#ffcc00">Загаданное число больше.</span>`;
-    } else {
-        resText.innerHTML = `📉 <span style="color:#ffcc00">Загаданное число меньше.</span>`;
-    }
-    
-    input.value = '';
-}
-
-// Инициализация магазина при загрузке
-renderShop();
