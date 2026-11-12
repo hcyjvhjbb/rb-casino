@@ -5,29 +5,62 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>RB eSports Casino</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; user-select: none; }
+        body { background-color: #0a0a0a; color: #fff; display: flex; justify-content: center; min-height: 100vh; overflow-x: hidden; }
+        .app-container { width: 100%; max-width: 450px; background: linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 100%); min-height: 100vh; display: flex; flex-direction: column; padding-bottom: 20px; }
+        
+        .banner-container { width: 100%; height: 160px; overflow: hidden; border-bottom: 2px solid #ff0000; box-shadow: 0 4px 15px rgba(255, 0, 0, 0.2); }
+        .banner { width: 100%; height: 100%; object-fit: cover; object-position: center; }
+        
+        .balance-card { margin: 15px 15px 0 15px; padding: 12px; background: rgba(30, 30, 30, 0.8); border: 1px solid #333; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; font-size: 16px; }
+        .balance-value { font-weight: bold; color: #ffcc00; font-size: 20px; }
+
+        .tabs { display: flex; margin: 15px; background: #222; border-radius: 10px; padding: 5px; gap: 5px; }
+        .tab-btn { flex: 1; padding: 10px; border: none; border-radius: 8px; background: transparent; color: #888; font-weight: bold; cursor: pointer; transition: all 0.2s; font-size: 14px; }
+        .tab-btn.active { background: #ff0000; color: #fff; box-shadow: 0 0 10px rgba(255, 0, 0, 0.4); }
+        .tab-content { display: none; padding: 0 15px; flex-direction: column; align-items: center; }
+        .tab-content.active { display: flex; animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .roulette-window { width: 140px; height: 140px; background: #000; border: 3px solid #ff0000; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: 10px 0 20px 0; box-shadow: 0 0 30px rgba(255, 0, 0, 0.3), inset 0 0 20px rgba(0,0,0,1); }
+        .roulette-result { font-size: 60px; }
+        
+        .colors-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; margin-bottom: 20px; }
+        .color-btn { padding: 15px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; color: #fff; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: transform 0.1s; }
+        .color-btn:active { transform: scale(0.95); }
+        .yellow { background: linear-gradient(135deg, #ffd700, #b8860b); color: #000; }
+        .green { background: linear-gradient(135deg, #32cd32, #006400); }
+        .blue { background: linear-gradient(135deg, #1e90ff, #00008b); }
+        .purple { background: linear-gradient(135deg, #9370db, #4b0082); }
+        .orange { background: linear-gradient(135deg, #ff8c00, #8b4500); }
+
+        .bet-area { width: 100%; background: rgba(0, 0, 0, 0.6); padding: 15px; border-radius: 12px; border: 1px solid #ff3333; display: none; flex-direction: column; align-items: center; }
+        .bet-area.active { display: flex; }
+        .bet-label { margin-bottom: 10px; font-size: 14px; color: #ccc; }
+        .bet-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; margin-bottom: 10px; }
+        .bet-btn { padding: 12px; background: #333; color: #fff; border: 1px solid #555; border-radius: 8px; font-weight: bold; cursor: pointer; transition: background 0.2s; }
+        .bet-btn:active { background: #555; }
+        .cancel-btn { background: transparent; color: #ff3333; border: none; padding: 10px; cursor: pointer; text-decoration: underline; }
+    </style>
 </head>
 <body>
     <div class="app-container">
-        <!-- Баннер -->
         <div class="banner-container">
             <img src="banner.png" alt="RB eSports" class="banner">
         </div>
 
-        <!-- Баланс -->
         <div class="balance-card">
             <span class="balance-label">Ваш баланс:</span>
-            <span class="balance-value" id="user-balance">Загрузка...</span> <span class="coin-icon">🪙</span>
+            <span class="balance-value" id="user-balance">Загрузка...</span> 🪙
         </div>
 
-        <!-- Навигация -->
         <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab(event, 'roulette')">🎡 Рулетка</button>
-            <button class="tab-btn" onclick="switchTab(event, 'shop')">🛒 Магазин</button>
-            <button class="tab-btn" onclick="switchTab(event, 'code')">💻 Взлом</button>
+            <button class="tab-btn active" id="btn-tab-roulette" onclick="switchTab('roulette')">🎡 Рулетка</button>
+            <button class="tab-btn" id="btn-tab-shop" onclick="switchTab('shop')">🛒 Магазин</button>
         </div>
 
-        <!-- РАЗДЕЛ: РУЛЕТКА -->
+        <!-- РУЛЕТКА -->
         <div id="tab-roulette" class="tab-content active">
             <div class="roulette-window">
                 <div class="roulette-result" id="roulette-display">🎲</div>
@@ -41,8 +74,8 @@
                 <button class="color-btn orange" onclick="selectColor('orange', 21)">🟧 x21</button>
             </div>
 
-            <div class="bet-area hidden" id="bet-area">
-                <p class="bet-label">Ставка на <span id="selected-color-name"></span> (x<span id="selected-multiplier"></span>)</p>
+            <div class="bet-area" id="bet-area">
+                <p class="bet-label">Ставка на <span id="selected-color-name" style="color:#ffcc00; font-weight:bold;"></span></p>
                 <div class="bet-grid">
                     <button class="bet-btn" onclick="spin(10)">10 🪙</button>
                     <button class="bet-btn" onclick="spin(50)">50 🪙</button>
@@ -51,27 +84,65 @@
                 </div>
                 <button class="cancel-btn" onclick="cancelBet()">Отмена</button>
             </div>
-
-            <div class="result-text" id="result-text"></div>
         </div>
 
-        <!-- РАЗДЕЛ: МАГАЗИН -->
+        <!-- МАГАЗИН -->
         <div id="tab-shop" class="tab-content">
-            <div class="shop-grid" id="shop-grid"></div>
+            <h3 style="margin-top: 20px; color: #ffcc00;">Магазин UC</h3>
+            <p style="color: #888; margin-bottom: 15px;">Скоро здесь появятся товары</p>
         </div>
-
-        <!-- РАЗДЕЛ: ВЗЛОМ КОДА -->
-        <div id="tab-code" class="tab-content">
-            <div class="code-container">
-                <h3>Взлом кода</h3>
-                <p>Введи число от 1 до 100</p>
-                <input type="number" id="code-input" placeholder="Твое число..." min="1" max="100">
-                <button class="action-btn" onclick="tryCode()">Взломать</button>
-                <div class="result-text" id="code-result-text"></div>
-            </div>
-        </div>
-
     </div>
-    <script src="app.js"></script>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+
+        // Получаем баланс из URL (бот передает его при открытии)
+        const urlParams = new URLSearchParams(window.location.search);
+        let currentBalance = parseInt(urlParams.get('balance')) || 0;
+        document.getElementById('user-balance').innerText = currentBalance;
+
+        let selectedColor = null;
+        let selectedMultiplier = 0;
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            document.getElementById(`btn-tab-${tabName}`).classList.add('active');
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+        }
+
+        function selectColor(color, multiplier) {
+            selectedColor = color;
+            selectedMultiplier = multiplier;
+            
+            document.getElementById('colors-grid').style.display = 'none';
+            document.getElementById('bet-area').classList.add('active');
+            
+            const names = { yellow: 'Жёлтый', green: 'Зелёный', blue: 'Синий', purple: 'Фиолетовый', orange: 'Оранжевый' };
+            document.getElementById('selected-color-name').innerText = names[color];
+        }
+
+        function cancelBet() {
+            selectedColor = null;
+            document.getElementById('colors-grid').style.display = 'grid';
+            document.getElementById('bet-area').classList.remove('active');
+        }
+
+        function spin(betAmount) {
+            if (betAmount > currentBalance) {
+                alert("❌ Недостаточно фишек для этой ставки!");
+                return;
+            }
+
+            // Отправляем данные боту (окно закроется автоматически)
+            tg.sendData(JSON.stringify({
+                action: "spin",
+                bet: betAmount,
+                color: selectedColor
+            }));
+        }
+    </script>
 </body>
 </html>
