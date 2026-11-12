@@ -16,6 +16,12 @@
         .btn-purple { background: #9370db; color: #fff; }
         .btn-orange { background: #ff8c00; color: #fff; }
         .hidden { display: none; }
+        
+        /* Стили для магазина */
+        .shop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+        .shop-item { background: #222; padding: 10px; border-radius: 8px; text-align: center; border: 1px solid #444;}
+        .shop-item img { width: 50px; height: 50px; margin-bottom: 5px; }
+        .buy-btn { width: 100%; padding: 10px; background: #ff0000; color: #fff; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 5px;}
     </style>
 </head>
 <body>
@@ -24,37 +30,75 @@
         <h1 id="balance" style="color: #ffcc00;">0</h1>
     </div>
 
-    <div class="box" id="roulette-box">
-        <h3>Рулетка</h3>
-        <div id="colors" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-            <button class="btn btn-yellow" onclick="selectColor('yellow', 2)">🟨 x2</button>
-            <button class="btn btn-green" onclick="selectColor('green', 4)">🟩 x4</button>
-            <button class="btn btn-blue" onclick="selectColor('blue', 6)">🟦 x6</button>
-            <button class="btn btn-purple" onclick="selectColor('purple', 11)">🟪 x11</button>
-            <button class="btn btn-orange" onclick="selectColor('orange', 21)">🟧 x21</button>
+    <div class="box">
+        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+            <button class="btn" onclick="showTab('roulette')">🎡 Рулетка</button>
+            <button class="btn" onclick="showTab('shop')">🛒 Магазин</button>
         </div>
 
-        <div id="bets" class="hidden" style="margin-top: 15px;">
-            <p>Ставка на <span id="sel-color"></span></p>
-            <button class="btn" onclick="spin(10)">10 🪙</button>
-            <button class="btn" onclick="spin(50)">50 🪙</button>
-            <button class="btn" onclick="spin(100)">100 🪙</button>
-            <button class="btn" onclick="spin(500)">500 🪙</button>
-            <button class="btn" style="background: transparent; color: red; border: none;" onclick="cancel()">Отмена</button>
+        <!-- РУЛЕТКА -->
+        <div id="tab-roulette">
+            <div id="colors" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <button class="btn btn-yellow" onclick="selectColor('yellow')">🟨 x2</button>
+                <button class="btn btn-green" onclick="selectColor('green')">🟩 x4</button>
+                <button class="btn btn-blue" onclick="selectColor('blue')">🟦 x6</button>
+                <button class="btn btn-purple" onclick="selectColor('purple')">🟪 x11</button>
+                <button class="btn btn-orange" onclick="selectColor('orange')">🟧 x21</button>
+            </div>
+
+            <div id="bets" class="hidden" style="margin-top: 15px;">
+                <p>Ставка на <span id="sel-color" style="color: yellow; font-weight: bold;"></span></p>
+                <button class="btn" onclick="spin(10)">10 🪙</button>
+                <button class="btn" onclick="spin(50)">50 🪙</button>
+                <button class="btn" onclick="spin(100)">100 🪙</button>
+                <button class="btn" onclick="spin(500)">500 🪙</button>
+                <button class="btn" style="background: transparent; color: red; border: none;" onclick="cancel()">Отмена</button>
+            </div>
+        </div>
+
+        <!-- МАГАЗИН -->
+        <div id="tab-shop" class="hidden">
+            <div class="shop-grid">
+                <div class="shop-item">
+                    <img src="uc_icon.png" onerror="this.src='https://via.placeholder.com/50?text=UC'">
+                    <div style="font-weight:bold; color:gold;">60 UC</div>
+                    <div style="font-size:12px; color:#aaa;">100 🪙</div>
+                    <button class="buy-btn" onclick="buy(60, 100)">Купить</button>
+                </div>
+                <div class="shop-item">
+                    <img src="uc_icon.png" onerror="this.src='https://via.placeholder.com/50?text=UC'">
+                    <div style="font-weight:bold; color:gold;">325 UC</div>
+                    <div style="font-size:12px; color:#aaa;">500 🪙</div>
+                    <button class="buy-btn" onclick="buy(325, 500)">Купить</button>
+                </div>
+                <div class="shop-item">
+                    <img src="uc_icon.png" onerror="this.src='https://via.placeholder.com/50?text=UC'">
+                    <div style="font-weight:bold; color:gold;">660 UC</div>
+                    <div style="font-size:12px; color:#aaa;">1000 🪙</div>
+                    <button class="buy-btn" onclick="buy(660, 1000)">Купить</button>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         
-        // Берем баланс из ссылки
+        // Получаем баланс и ссылку на бота
         const urlParams = new URLSearchParams(window.location.search);
         let balance = parseInt(urlParams.get('balance')) || 0;
+        let botUsername = urlParams.get('bot') || "rbesport_bot"; // Имя вашего бота
         document.getElementById('balance').innerText = balance;
 
         let currentColor = "";
 
-        function selectColor(color, mult) {
+        function showTab(tab) {
+            document.getElementById('tab-roulette').classList.add('hidden');
+            document.getElementById('tab-shop').classList.add('hidden');
+            document.getElementById('tab-' + tab).classList.remove('hidden');
+        }
+
+        function selectColor(color) {
             currentColor = color;
             document.getElementById('colors').classList.add('hidden');
             document.getElementById('bets').classList.remove('hidden');
@@ -66,24 +110,30 @@
             document.getElementById('bets').classList.add('hidden');
         }
 
+        function sendAction(actionData) {
+            // Если открыто в Telegram, отправляем данные и закрываем окно
+            if (tg && tg.initData) {
+                tg.sendData(JSON.stringify(actionData));
+            } else {
+                // Если на ПК (Telegram Desktop), переходим по скрытой ссылке
+                window.location.href = `https://t.me/${botUsername}?start=${actionData.action}_${actionData.bet || actionData.uc}_${actionData.color || actionData.price}`;
+            }
+        }
+
         function spin(amount) {
             if (amount > balance) {
                 alert("❌ Недостаточно фишек!");
                 return;
             }
+            sendAction({ action: "spin", bet: amount, color: currentColor });
+        }
 
-            // ПРОВЕРКА: если вы на ПК, tg.sendData не работает, показываем alert
-            if (tg.platform === "tdesktop" || tg.platform === "web") {
-                alert(`Вы на ПК. Ставка ${amount} на ${currentColor} принята. (На телефоне окно закроется само)`);
+        function buy(uc, price) {
+            if (price > balance) {
+                alert("❌ Недостаточно фишек!");
                 return;
             }
-            
-            // Отправка в бота
-            try {
-                tg.sendData(JSON.stringify({ action: "spin", bet: amount, color: currentColor }));
-            } catch (e) {
-                alert("Ошибка Telegram: " + e.message);
-            }
+            sendAction({ action: "buy", uc: uc, price: price });
         }
     </script>
 </body>
